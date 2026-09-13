@@ -15,19 +15,18 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            asciidoc-base automake bison build-essential ca-certificates \
+            asciidoc-base automake bison build-essential ca-certificates curl \
             debhelper dh-python flex \
             doxygen git graphviz libeditreadline-dev libgmp-dev \
             libjansson-dev libmnl-dev libpython3-all-dev libtool \
             libxtables-dev pkgconf pybuild-plugin-pyproject python3-all \
             python3-setuptools
-      - name: Build libnftnl
+      - name: Install compatible libnftnl build
         run: |
-          git clone --depth 1 --branch vyos/1.3.2-1 \
-            https://github.com/homerouter/libnftnl-fullcone.git /build/lib
-          cd /build/lib
-          dpkg-checkbuilddeps
-          DEB_BUILD_OPTIONS="terse parallel=2" dpkg-buildpackage -b -us -uc -j2
+          curl -fL --retry 3 -o /build/libnftnl11_1.3.2-1_amd64.deb \
+            https://github.com/homerouter/libnftnl-fullcone/releases/download/1.3.2-1/libnftnl11_1.3.2-1_amd64.deb
+          curl -fL --retry 3 -o /build/libnftnl-dev_1.3.2-1_amd64.deb \
+            https://github.com/homerouter/libnftnl-fullcone/releases/download/1.3.2-1/libnftnl-dev_1.3.2-1_amd64.deb
           dpkg -i /build/libnftnl11_1.3.2-1_amd64.deb \
             /build/libnftnl-dev_1.3.2-1_amd64.deb
       - name: Build nftables
@@ -35,6 +34,7 @@ jobs:
           git clone --depth 1 --branch vyos/1.1.7-1 \
             https://github.com/homerouter/nftables-fullcone.git /build/nft
           cd /build/nft
+          sed -i 's/debhelper-compat (= 14)/debhelper-compat (= 13)/' debian/control
           dpkg-checkbuilddeps
           DEB_BUILD_OPTIONS="terse parallel=2" dpkg-buildpackage -b -us -uc -j2
       - name: Verify Fullcone binaries
