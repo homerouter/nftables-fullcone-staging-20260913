@@ -1,11 +1,15 @@
 name: Build VyOS debs
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/build-debs.yml
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: debian:unstable-slim
+    container: debian:bookworm-slim
     steps:
       - name: Install build dependencies
         run: |
