@@ -1,0 +1,51 @@
+name: Build VyOS debs
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: debian:unstable-slim
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            automake build-essential ca-certificates debhelper dh-python \
+            doxygen git graphviz libeditreadline-dev libgmp-dev \
+            libjansson-dev libmnl-dev libpython3-all-dev libtool \
+            libxtables-dev pkgconf pybuild-plugin-pyproject python3-all \
+            python3-setuptools
+      - name: Build libnftnl
+        run: |
+          git clone --depth 1 --branch vyos/1.3.2-1 \
+            https://github.com/homerouter/libnftnl-fullcone.git /build/lib
+          cd /build/lib
+          dpkg-checkbuilddeps
+          DEB_BUILD_OPTIONS="terse parallel=2" dpkg-buildpackage -b -us -uc -j2
+          dpkg -i /build/libnftnl11_1.3.2-1_amd64.deb \
+            /build/libnftnl-dev_1.3.2-1_amd64.deb
+      - name: Build nftables
+        run: |
+          git clone --depth 1 --branch vyos/1.1.7-1 \
+            https://github.com/homerouter/nftables-fullcone.git /build/nft
+          cd /build/nft
+          dpkg-checkbuilddeps
+          DEB_BUILD_OPTIONS="terse parallel=2" dpkg-buildpackage -b -us -uc -j2
+      - name: Verify Fullcone binaries
+        run: |
+          mkdir /inspect-lib /inspect-nft
+          dpkg-deb -x /build/libnftnl11_1.3.2-1_amd64.deb /inspect-lib
+          dpkg-deb -x /build/nftables_1.1.7-1_amd64.deb /inspect-nft
+          grep -R -a -q fullcone /inspect-lib
+          grep -R -a -q fullcone /inspect-nft
+          grep -R -a -q brcmfullcone /inspect-nft
+          cd /build
+          sha256sum *.deb > SHA256SUMS
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: vyos-fullcone-debs
+          path: |
+            /build/*.deb
+            /build/SHA256SUMS
