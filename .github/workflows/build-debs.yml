@@ -11,7 +11,7 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            automake build-essential ca-certificates debhelper dh-python \
+            automake bison build-essential ca-certificates debhelper dh-python flex \
             doxygen git graphviz libeditreadline-dev libgmp-dev \
             libjansson-dev libmnl-dev libpython3-all-dev libtool \
             libxtables-dev pkgconf pybuild-plugin-pyproject python3-all \
