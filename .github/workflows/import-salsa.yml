@@ -1,0 +1,20 @@
+name: Import Salsa tag
+
+on: workflow_dispatch
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Import Debian tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git clone https://salsa.debian.org/pkg-netfilter-team/pkg-nftables.git source
+          cd source
+          git branch import/debian-1.1.7-1 debian/1.1.7-1
+          git remote add staging https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git push staging refs/tags/debian/1.1.7-1 refs/heads/import/debian-1.1.7-1
