@@ -24,6 +24,7 @@ jobs:
             python3-setuptools
       - name: Install compatible libnftnl build
         run: |
+          mkdir -p /build
           curl -fL --retry 3 -o /build/libnftnl11_1.3.2-1_amd64.deb \
             https://github.com/homerouter/libnftnl-fullcone/releases/download/1.3.2-1/libnftnl11_1.3.2-1_amd64.deb
           curl -fL --retry 3 -o /build/libnftnl-dev_1.3.2-1_amd64.deb \
