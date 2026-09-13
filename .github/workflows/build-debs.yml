@@ -48,6 +48,7 @@ jobs:
           grep -R -a -q fullcone /inspect-lib
           grep -R -a -q fullcone /inspect-nft
           grep -R -a -q brcmfullcone /inspect-nft
+          dpkg-deb --field /build/libnftables1_1.1.7-1_amd64.deb Depends | grep -q 'libc6'
           cd /build
           sha256sum *.deb > SHA256SUMS
       - name: Upload packages
